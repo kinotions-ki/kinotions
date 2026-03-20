@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinotions — Ki, Systems Expert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0b;
+    --off-black: #111113;
+    --dark: #161618;
+    --white: #f4f4f6;
+    --off-white: #eeeef2;
+    --mid: #8a8a92;
+    --accent: #7c9bbd;
+    --line: rgba(244,244,246,0.08);
+    --line-dark: rgba(10,10,11,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* STAR CURSOR */
+  #star-cursor {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    transition: left 0.04s linear, top 0.04s linear;
+  }
+  #star-cursor svg { width: 26px; height: 26px; }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px 56px;
+    transition: background 0.4s, padding 0.4s, border-color 0.4s;
+    border-bottom: 1px solid transparent;
+  }
+  nav.scrolled {
+    background: rgba(10,10,11,0.9);
+    backdrop-filter: blur(16px);
+    padding: 16px 56px;
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-logo { display: flex; align-items: center; }
+  .nav-logo svg { width: 24px; height: 24px; }
+  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    color: rgba(244,244,246,0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    color: var(--black);
+    background: var(--white);
+    padding: 10px 26px;
+    text-decoration: none;
+    transition: background 0.25s, color 0.25s;
+  }
+  .nav-cta:hover { background: var(--accent); color: var(--white); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=80');
+    background-size: cover;
+    background-position: center 30%;
+    filter: brightness(0.3) saturate(0.3);
+    transform: scale(1.06);
+    transition: transform 8s ease;
+  }
+  .hero-bg.loaded { transform: scale(1.01); }
+  .hero-grain {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 2;
+  }
+  .hero-content {
+    position: relative; z-index: 3;
+    padding: 0 56px 80px; width: 100%;
+  }
+  .hero-eyebrow {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.42em;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .hero-eyebrow::before { content:''; width:40px; height:1px; background:var(--accent); display:block; }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 13vw, 14rem);
+    line-height: 0.88;
+    letter-spacing: 0.01em;
+    color: var(--white);
+  }
+  .hero-title .script {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300;
+    font-size: 0.52em;
+    color: rgba(244,244,246,0.5);
+    display: block;
+    letter-spacing: 0.02em;
+    margin-bottom: -4px;
+  }
+  .hero-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 36px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .hero-desc {
+    font-size: 0.9rem; line-height: 1.75;
+    color: rgba(244,244,246,0.5);
+    max-width: 380px;
+  }
+  .hero-scroll {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.62rem; letter-spacing: 0.35em;
+    color: rgba(244,244,246,0.25);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-scroll::after { content:''; width:1px; height:44px; background:rgba(244,244,246,0.15); display:block; }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden; padding: 14px 0;
+    position: relative; z-index: 4;
+  }
+  .marquee-wrap.light { background: var(--white); color: var(--black); }
+  .marquee-wrap.dark {
+    background: var(--black); color: var(--white);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .marquee-track {
+    display: flex; width: max-content;
+    animation: marquee 24s linear infinite;
+  }
+  .marquee-track.rev { animation-direction: reverse; animation-duration: 20s; }
+  .marquee-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.76rem; letter-spacing: 0.3em;
+    white-space: nowrap; padding: 0 36px;
+    display: flex; align-items: center; gap: 36px;
+  }
+  .sep { opacity: 0.35; }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ABOUT */
+  #about {
+    background: var(--off-white); color: var(--black);
+    padding: 120px 56px; position: relative; overflow: hidden;
+  }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+  .about-img-wrap { position: relative; }
+  .about-img {
+    width: 100%; aspect-ratio: 3/4;
+    object-fit: cover;
+    filter: grayscale(25%) saturate(0.85) contrast(1.05);
+    display: block;
+  }
+  .img-grain {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .img-badge {
+    position: absolute; bottom: 28px; left: -18px;
+    background: var(--black); color: var(--white);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.62rem; letter-spacing: 0.3em;
+    padding: 10px 20px;
+  }
+  .section-label-dark {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.62rem; letter-spacing: 0.38em;
+    color: var(--mid); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label-dark::before { content:''; width:22px; height:1px; background:var(--mid); display:block; }
+  .about-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 5.5rem);
+    line-height: 0.9; color: var(--black);
+  }
+  .about-title .script {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300;
+    font-size: 0.55em; color: #999;
+    display: block; letter-spacing: 0.02em;
+  }
+  .about-body {
+    font-size: 0.93rem; line-height: 1.85;
+    color: #3e3e46; margin: 30px 0;
+  }
+  .about-footer {
+    display: flex; align-items: center; gap: 16px;
+    padding-top: 26px;
+    border-top: 1px solid rgba(10,10,11,0.08);
+  }
+  .av-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #c8c8d2; overflow: hidden; flex-shrink: 0;
+  }
+  .av-circle img { width:100%; height:100%; object-fit:cover; }
+  .av-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.82rem; letter-spacing: 0.15em; color: var(--black);
+  }
+  .av-role { font-size: 0.73rem; color: var(--mid); margin-top: 2px; }
+
+  /* SERVICES */
+  #services { background: var(--black); padding: 120px 56px; }
+  .section-label-light {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.62rem; letter-spacing: 0.38em;
+    color: var(--mid); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label-light::before { content:''; width:22px; height:1px; background:var(--mid); display:block; }
+  .services-header {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: end; margin-bottom: 64px;
+  }
+  .services-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 7rem);
+    line-height: 0.88; color: var(--white);
+  }
+  .services-title .script {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300;
+    font-size: 0.5em; color: var(--mid);
+    display: block; letter-spacing: 0.02em;
+  }
+  .services-note { font-size: 0.87rem; line-height: 1.8; color: rgba(244,244,246,0.4); align-self: end; }
+  .services-list { list-style: none; }
+  .service-row {
+    display: grid; grid-template-columns: 56px 1fr auto;
+    align-items: center; gap: 36px;
+    padding: 34px 0; border-top: 1px solid var(--line);
+    transition: padding-left 0.35s ease;
+  }
+  .service-row:last-child { border-bottom: 1px solid var(--line); }
+  .service-row:hover { padding-left: 16px; }
+  .s-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.68rem; letter-spacing: 0.2em;
+    color: rgba(244,244,246,0.18);
+  }
+  .s-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.5rem, 2.8vw, 2.6rem);
+    letter-spacing: 0.04em; color: var(--white);
+    transition: color 0.3s; line-height: 1;
+    margin-bottom: 7px;
+  }
+  .service-row:hover .s-name { color: var(--accent); }
+  .s-desc { font-size: 0.82rem; line-height: 1.65; color: rgba(244,244,246,0.38); max-width: 480px; }
+  .s-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 1.15rem;
+    color: var(--mid); white-space: nowrap; font-weight: 300;
+  }
+
+  /* PORTFOLIO */
+  #portfolio { background: var(--off-white); color: var(--black); padding: 120px 56px; }
+  .portfolio-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-end; margin-bottom: 48px;
+  }
+  .portfolio-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 7rem);
+    line-height: 0.88; color: var(--black);
+  }
+  .portfolio-title .script {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300;
+    font-size: 0.5em; color: #aaa;
+    display: block;
+  }
+  .portfolio-note { font-size: 0.78rem; color: var(--mid); max-width: 180px; text-align: right; line-height: 1.6; }
+  .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+  .p-card {
+    position: relative; overflow: hidden;
+    display: block; text-decoration: none; background: #ccc;
+  }
+  .p-card.tall { grid-row: span 2; }
+  .p-thumb {
+    width: 100%; min-height: 280px; height: 100%;
+    object-fit: cover; display: block;
+    filter: grayscale(20%) saturate(0.85);
+    transition: transform 0.7s ease, filter 0.4s;
+  }
+  .p-card:hover .p-thumb { transform: scale(1.04); filter: grayscale(0%) saturate(1.1); }
+  .p-grain { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  }
+  .p-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,11,0.8) 0%, transparent 55%);
+    z-index: 2; display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 28px;
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .p-card:hover .p-overlay { opacity: 1; }
+  .p-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.35rem; letter-spacing: 0.06em;
+    color: var(--white); margin-bottom: 4px;
+  }
+  .p-type { font-size: 0.68rem; letter-spacing: 0.14em; color: rgba(244,244,246,0.5); }
+  .p-arrow {
+    position: absolute; top: 22px; right: 22px;
+    width: 34px; height: 34px;
+    border: 1px solid rgba(244,244,246,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--white); font-size: 0.8rem; z-index: 3;
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .p-card:hover .p-arrow { opacity: 1; }
+
+  /* FAQ */
+  #faq { background: var(--dark); padding: 120px 56px; }
+  .faq-layout { display: grid; grid-template-columns: 360px 1fr; gap: 100px; align-items: start; }
+  .faq-sticky { position: sticky; top: 110px; }
+  .faq-big-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.2rem, 4.5vw, 5.5rem);
+    line-height: 0.9; color: var(--white); margin-bottom: 22px;
+  }
+  .faq-big-title .script {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300;
+    font-size: 0.55em; color: var(--mid); display: block; letter-spacing: 0.02em;
+  }
+  .faq-note { font-size: 0.85rem; line-height: 1.72; color: rgba(244,244,246,0.38); margin-bottom: 28px; }
+  .faq-cta-link {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.68rem; letter-spacing: 0.2em;
+    color: var(--accent); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: gap 0.2s;
+  }
+  .faq-cta-link:hover { gap: 14px; }
+  .faq-list { list-style: none; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q {
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 20px; cursor: none; user-select: none;
+  }
+  .faq-q-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 0.05em;
+    color: var(--white); line-height: 1.2;
+  }
+  .faq-icon {
+    width: 30px; height: 30px; border: 1px solid var(--line);
+    border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--mid); font-size: 1.1rem; line-height: 1;
+    transition: all 0.3s;
+  }
+  .faq-item.open .faq-icon { background: var(--white); color: var(--black); border-color: var(--white); transform: rotate(45deg); }
+  .faq-a {
+    font-size: 0.87rem; line-height: 1.8;
+    color: rgba(244,244,246,0.45);
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+  }
+  .faq-item.open .faq-a { max-height: 300px; padding-top: 15px; }
+
+  /* CONTACT */
+  #contact { padding: 120px 56px; position: relative; overflow: hidden; }
+  .contact-bg {
+    position: absolute; inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1600&q=80');
+    background-size: cover; background-position: center;
+    filter: brightness(0.07) saturate(0.3) blur(3px);
+    transform: scale(1.03);
+  }
+  .contact-inner { position: relative; z-index: 2; }
+  .contact-big-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 13rem);
+    line-height: 0.84; color: var(--white); margin-bottom: 72px;
+  }
+  .contact-big-title .script {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300;
+    font-size: 0.35em; color: rgba(244,244,246,0.35);
+    display: block; letter-spacing: 0.02em;
+  }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+  .contact-note { font-size: 0.9rem; line-height: 1.78; color: rgba(244,244,246,0.45); margin-bottom: 36px; }
+  .social-rows { display: flex; flex-direction: column; }
+  .s-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 16px 0;
+    border-bottom: 1px solid rgba(244,244,246,0.07);
+    text-decoration: none; color: var(--white); transition: color 0.2s;
+  }
+  .s-row:hover { color: var(--accent); }
+  .s-row-name { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.15em; }
+  .s-row-handle { font-size: 0.75rem; color: rgba(244,244,246,0.3); }
+  .contact-form { display: flex; flex-direction: column; gap: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .fg { display: flex; flex-direction: column; gap: 7px; }
+  .fg label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.32em;
+    color: rgba(244,244,246,0.28);
+  }
+  .fg input, .fg textarea, .fg select {
+    background: rgba(244,244,246,0.04);
+    border: 1px solid rgba(244,244,246,0.09);
+    color: var(--white); padding: 13px 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem; font-weight: 300;
+    outline: none; -webkit-appearance: none;
+    transition: border-color 0.25s; cursor: none;
+  }
+  .fg input:focus, .fg textarea:focus, .fg select:focus { border-color: rgba(124,155,189,0.45); }
+  .fg textarea { height: 118px; resize: none; }
+  .fg select option { background: var(--dark); }
+  .form-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.25em;
+    background: var(--white); color: var(--black);
+    border: none; padding: 15px 40px;
+    align-self: flex-start; cursor: none;
+    transition: background 0.25s, color 0.25s;
+  }
+  .form-btn:hover { background: var(--accent); color: var(--white); }
+
+  /* FOOTER */
+  footer {
+    background: var(--black);
+    border-top: 1px solid var(--line);
+    padding: 26px 56px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .f-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .f-logo svg { width: 18px; height: 18px; }
+  .f-logo span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.2em;
+    color: rgba(244,244,246,0.35);
+  }
+  .f-copy { font-size: 0.66rem; letter-spacing: 0.1em; color: rgba(244,244,246,0.18); }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.75s ease, transform 0.75s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .d1 { transition-delay: 0.1s; }
+  .d2 { transition-delay: 0.2s; }
+  .d3 { transition-delay: 0.32s; }
+  .d4 { transition-delay: 0.44s; }
+
+  @media(max-width:768px){
+    nav{padding:18px 24px;}
+    nav.scrolled{padding:12px 24px;}
+    .nav-links,.nav-cta{display:none;}
+    #hero,.about-grid,.services-header,.portfolio-header,.faq-layout,.contact-grid{padding-left:24px;padding-right:24px;}
+    #about,#services,#portfolio,#faq,#contact{padding:80px 24px;}
+    .about-grid,.services-header,.contact-grid,.faq-layout{grid-template-columns:1fr;gap:40px;}
+    .portfolio-grid{grid-template-columns:1fr;}
+    .p-card.tall{grid-row:span 1;}
+    .form-row{grid-template-columns:1fr;}
+    .service-row{grid-template-columns:40px 1fr;}
+    .s-price{display:none;}
+    footer{flex-direction:column;gap:10px;text-align:center;padding:22px 24px;}
+    .hero-content{padding:0 24px 56px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- STAR CURSOR -->
+<div id="star-cursor">
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M50 4 L54 44 L96 48 L54 52 L50 92 L46 52 L4 48 L46 44 Z" fill="white"/>
+    <path d="M50 20 L52.5 44 L76 48 L52.5 52 L50 76 L47.5 52 L24 48 L47.5 44 Z" fill="white" opacity="0.25"/>
+  </svg>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 4 L54 44 L96 48 L54 52 L50 92 L46 52 L4 48 L46 44 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M50 22 L52 44 L74 48 L52 52 L50 74 L48 52 L26 48 L48 44 Z" fill="none" stroke="white" stroke-width="1" stroke-linejoin="round" opacity="0.3"/>
+      <circle cx="50" cy="48" r="3" fill="white" opacity="0.6"/>
+    </svg>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Work with me</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal">Notion Systems Expert</div>
+    <h1 class="hero-title reveal d1">
+      <span class="script">the one who builds</span>
+      KINOTIONS
+    </h1>
+    <div class="hero-bottom reveal d2">
+      <p class="hero-desc">I build customised Notion systems for creative studios and solopreneurs. If your backend is a mess or your client deliverables don't reflect your brand — that's where I come in.</p>
+      <div class="hero-scroll">Scroll</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE 1 -->
+<div class="marquee-wrap light">
+  <div class="marquee-track">
+    <div class="marquee-item">NOTION SYSTEMS <span class="sep">✦</span> CREATIVE STUDIOS <span class="sep">✦</span> CLIENT PORTALS <span class="sep">✦</span> WHITE LABEL <span class="sep">✦</span> WORKFLOW DESIGN <span class="sep">✦</span> BACKEND SYSTEMS <span class="sep">✦</span></div>
+    <div class="marquee-item">NOTION SYSTEMS <span class="sep">✦</span> CREATIVE STUDIOS <span class="sep">✦</span> CLIENT PORTALS <span class="sep">✦</span> WHITE LABEL <span class="sep">✦</span> WORKFLOW DESIGN <span class="sep">✦</span> BACKEND SYSTEMS <span class="sep">✦</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-img-wrap reveal">
+      <img class="about-img" src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80" alt="workspace" />
+      <div class="img-grain"></div>
+      <div class="img-badge">Systems Expert · Ki</div>
+    </div>
+    <div class="about-text">
+      <div class="section-label-dark reveal">About Ki</div>
+      <h2 class="about-title reveal d1">
+        <span class="script">the person behind</span>
+        THE SYSTEM
+      </h2>
+      <p class="about-body reveal d2">
+        I'm Ki, your go-to Systems Expert. You might catch me decluttering a Notion page in my free time. And if I'm not? I'm probably scrolling Pinterest with a hot cup of Chai.<br><br>
+        I believe your backend should work as hard as you do — and your client deliverables should feel as polished as your brand. That's what I build.
+      </p>
+      <div class="about-footer reveal d3">
+        <div class="av-circle">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Crect width='52' height='52' fill='%23c0c0ca'/%3E%3C/svg%3E" alt="Ki" />
+        </div>
+        <div>
+          <div class="av-name">Ki — Kinotions</div>
+          <div class="av-role">Notion Systems Expert</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE 2 -->
+<div class="marquee-wrap dark">
+  <div class="marquee-track rev">
+    <div class="marquee-item">YOUR BACKEND DESERVES BETTER <span class="sep">✦</span> SYSTEMS THAT ACTUALLY WORK <span class="sep">✦</span> BUILT AROUND HOW YOU WORK <span class="sep">✦</span> NO COOKIE-CUTTER TEMPLATES <span class="sep">✦</span></div>
+    <div class="marquee-item">YOUR BACKEND DESERVES BETTER <span class="sep">✦</span> SYSTEMS THAT ACTUALLY WORK <span class="sep">✦</span> BUILT AROUND HOW YOU WORK <span class="sep">✦</span> NO COOKIE-CUTTER TEMPLATES <span class="sep">✦</span></div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header">
+    <div>
+      <div class="section-label-light reveal">What I offer</div>
+      <h2 class="services-title reveal d1">
+        <span class="script">built for you</span>
+        SERVICES
+      </h2>
+    </div>
+    <p class="services-note reveal d2">Every project is scoped to your exact needs. Pricing always varies — starting from £200, going wherever your vision takes us.</p>
+  </div>
+  <ul class="services-list">
+    <li class="service-row reveal">
+      <div class="s-num">01</div>
+      <div>
+        <div class="s-name">Custom Notion Backend</div>
+        <p class="s-desc">A fully tailored workspace so your team wastes zero time on admin or hunting for entries. Built around how you actually work.</p>
+      </div>
+      <div class="s-price">From £200</div>
+    </li>
+    <li class="service-row reveal d1">
+      <div class="s-num">02</div>
+      <div>
+        <div class="s-name">Branded Client Portals</div>
+        <p class="s-desc">Beautiful, on-brand deliverable portals in Notion. Your clients get an experience that feels like a studio — not a shared doc.</p>
+      </div>
+      <div class="s-price">From £200</div>
+    </li>
+    <li class="service-row reveal d2">
+      <div class="s-num">03</div>
+      <div>
+        <div class="s-name">White-Label Systems</div>
+        <p class="s-desc">Need Notion work done under your brand? I build in the background, you deliver the result. Fully confidential, fully yours.</p>
+      </div>
+      <div class="s-price">From £200</div>
+    </li>
+  </ul>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <div class="portfolio-header">
+    <div>
+      <div class="section-label-dark reveal">Selected work</div>
+      <h2 class="portfolio-title reveal d1">
+        <span class="script">a look inside</span>
+        PORTFOLIO
+      </h2>
+    </div>
+    <p class="portfolio-note reveal d2">Click any project to explore the full Notion system</p>
+  </div>
+  <div class="portfolio-grid">
+    <a href="#" class="p-card tall reveal">
+      <img class="p-thumb" src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&q=80" alt="Project 1" />
+      <div class="p-grain"></div>
+      <div class="p-overlay">
+        <div class="p-title">Studio Operations Hub</div>
+        <div class="p-type">Backend System · Creative Studio</div>
+      </div>
+      <div class="p-arrow">↗</div>
+    </a>
+    <div style="display:flex;flex-direction:column;gap:3px;">
+      <a href="#" class="p-card reveal d1" style="flex:1;">
+        <img class="p-thumb" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" alt="Project 2" style="min-height:260px;" />
+        <div class="p-grain"></div>
+        <div class="p-overlay">
+          <div class="p-title">Client Portal Redesign</div>
+          <div class="p-type">Branded Deliverable · Solopreneur</div>
+        </div>
+        <div class="p-arrow">↗</div>
+      </a>
+      <a href="#" class="p-card reveal d2" style="flex:1;">
+        <img class="p-thumb" src="https://images.unsplash.com/photo-1555421689-491a97ff2040?w=800&q=80" alt="Project 3" style="min-height:260px;" />
+        <div class="p-grain"></div>
+        <div class="p-overlay">
+          <div class="p-title">White-Label CRM</div>
+          <div class="p-type">White Label · Agency</div>
+        </div>
+        <div class="p-arrow">↗</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="faq-layout">
+    <div class="faq-sticky">
+      <div class="section-label-light reveal">Common questions</div>
+      <h2 class="faq-big-title reveal d1">
+        <span class="script">you asked,</span>
+        I ANSWERED
+      </h2>
+      <p class="faq-note reveal d2">Everything you need to know before we work together. Still have something on your mind?</p>
+      <a href="#contact" class="faq-cta-link reveal d3">Just reach out →</a>
+    </div>
+    <ul class="faq-list reveal d1">
+      <li class="faq-item">
+        <div class="faq-q"><span class="faq-q-text">How does the process work?</span><div class="faq-icon">+</div></div>
+        <div class="faq-a">We start with a discovery call to understand your workflow, pain points, and goals. From there I scope the project, send a proposal, and once we're aligned — I get building. You'll get regular check-ins and a full walkthrough before delivery.</div>
+      </li>
+      <li class="faq-item">
+        <div class="faq-q"><span class="faq-q-text">How long does a project take?</span><div class="faq-icon">+</div></div>
+        <div class="faq-a">It depends on scope — a simple portal can be done in a few days, while a full company backend might take 2–3 weeks. I'll give you a clear timeline in the proposal so there are no surprises.</div>
+      </li>
+      <li class="faq-item">
+        <div class="faq-q"><span class="faq-q-text">Do you offer revisions?</span><div class="faq-icon">+</div></div>
+        <div class="faq-a">Yes — every project includes revision rounds. I want the system to actually work for you, so we don't close out until you're happy with it.</div>
+      </li>
+      <li class="faq-item">
+        <div class="faq-q"><span class="faq-q-text">What do you need from me to get started?</span><div class="faq-icon">+</div></div>
+        <div class="faq-a">Just your time for a discovery call and access to your current Notion workspace if you have one. The more context you give me, the better I can build for you.</div>
+      </li>
+      <li class="faq-item">
+        <div class="faq-q"><span class="faq-q-text">Can you work with my existing Notion setup?</span><div class="faq-icon">+</div></div>
+        <div class="faq-a">Absolutely. I can audit, restructure, and build on top of what you already have — or start fresh if that makes more sense. We'll decide together during discovery.</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-bg"></div>
+  <div class="contact-inner">
+    <div class="section-label-light reveal" style="color:rgba(244,244,246,0.28);">Get in touch</div>
+    <h2 class="contact-big-title reveal d1">
+      <span class="script">ready when you are</span>
+      LET'S BUILD
+    </h2>
+    <div class="contact-grid">
+      <div>
+        <p class="contact-note reveal">Ready to get your backend sorted? Fill in the form or find me on Instagram — I don't bite, I promise.</p>
+        <div class="social-rows reveal d1">
+          <a href="#" class="s-row"><span class="s-row-name">Instagram</span><span class="s-row-handle">@kinotions ↗</span></a>
+          <a href="#" class="s-row"><span class="s-row-name">Book a Call</span><span class="s-row-handle">Calendly ↗</span></a>
+          <a href="#" class="s-row"><span class="s-row-name">Email</span><span class="s-row-handle">hi@kinotions.com ↗</span></a>
+        </div>
+      </div>
+      <div class="contact-form reveal d2">
+        <div class="form-row">
+          <div class="fg"><label>Your Name</label><input type="text" placeholder="Jane Doe" /></div>
+          <div class="fg"><label>Email</label><input type="email" placeholder="hello@yourbrand.com" /></div>
+        </div>
+        <div class="fg">
+          <label>What are you looking for?</label>
+          <select>
+            <option value="">Select a service</option>
+            <option>Custom Notion Backend</option>
+            <option>Branded Client Portal</option>
+            <option>White-Label System</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div class="fg"><label>Tell me about your project</label><textarea placeholder="Give me the chaos — I'll sort it out."></textarea></div>
+        <button class="form-btn">Send Message ✦</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#hero" class="f-logo">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 4 L54 44 L96 48 L54 52 L50 92 L46 52 L4 48 L46 44 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round" opacity="0.35"/>
+      <circle cx="50" cy="48" r="3" fill="white" opacity="0.25"/>
+    </svg>
+    <span>Kinotions</span>
+  </a>
+  <div class="f-copy">© 2025 Ki · Systems that work. Spaces that feel right.</div>
+</footer>
+
+<script>
+  // Star cursor
+  const cur = document.getElementById('star-cursor');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top = e.clientY + 'px';
+  });
+
+  // Nav scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Hero parallax
+  document.addEventListener('mousemove', e => {
+    const bg = document.getElementById('heroBg');
+    if (!bg) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 14;
+    const y = (e.clientY / window.innerHeight - 0.5) * 9;
+    bg.style.transform = `scale(1.04) translate(${x}px, ${y}px)`;
+  });
+
+  // Hero bg transition
+  window.addEventListener('load', () => document.getElementById('heroBg').classList.add('loaded'));
+
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // FAQ
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      const open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!open) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>
